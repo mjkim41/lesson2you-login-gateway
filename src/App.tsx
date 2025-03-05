@@ -7,6 +7,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import LoginPage from "./components/LoginPage";
+import MessagesPage from "./pages/MessagesPage";
+import VideoSchedulePage from "./pages/VideoSchedulePage";
+import VideoChatPage from "./pages/VideoChatPage";
 import "./animations.css";
 
 const queryClient = new QueryClient();
@@ -20,6 +23,9 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/video-schedule" element={<VideoSchedulePage />} />
+          <Route path="/video-chat" element={<VideoChatPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

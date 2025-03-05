@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles } from "lucide-react";
+import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video } from "lucide-react";
 import { toast } from "sonner";
 
 const HomePage: React.FC = () => {
@@ -60,6 +60,10 @@ const HomePage: React.FC = () => {
     navigate("/login");
   };
 
+  const goToVideoSchedule = () => {
+    navigate("/video-schedule");
+  };
+
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
       {/* 네비게이션 바 */}
@@ -75,9 +79,23 @@ const HomePage: React.FC = () => {
                 <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">재능 찾기</a>
                 <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">재능 등록</a>
                 <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">커뮤니티</a>
+                <button 
+                  onClick={goToVideoSchedule}
+                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
+                >
+                  <Video size={16} /> 화상 수업
+                </button>
               </div>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center space-x-3">
+              <button 
+                onClick={() => navigate("/messages")}
+                className="relative p-2 text-gray-700 hover:text-primary rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="메시지함"
+              >
+                <MessageSquare size={20} />
+                <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">2</span>
+              </button>
               <button 
                 onClick={goToLogin}
                 className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
