@@ -11,6 +11,11 @@ import MessagesPage from "./pages/MessagesPage";
 import VideoSchedulePage from "./pages/VideoSchedulePage";
 import VideoChatPage from "./pages/VideoChatPage";
 import FriendsPage from "./pages/FriendsPage";
+import TalentSearchPage from "./pages/TalentSearchPage";
+import TalentRegisterPage from "./pages/TalentRegisterPage";
+import VideoClassesPage from "./pages/VideoClassesPage";
+import ReservationsPage from "./pages/ReservationsPage";
+import TalentDetailPage from "./pages/TalentDetailPage";
 import "./animations.css";
 
 const queryClient = new QueryClient();
@@ -25,9 +30,15 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/messages" element={<MessagesPage />} />
+          <Route path="/messages/:id" element={<MessagesPage />} />
           <Route path="/video-schedule" element={<VideoSchedulePage />} />
           <Route path="/video-chat" element={<VideoChatPage />} />
           <Route path="/friends" element={<FriendsPage />} />
+          <Route path="/talent-search" element={<TalentSearchPage />} />
+          <Route path="/talent-register" element={<TalentRegisterPage />} />
+          <Route path="/video-classes" element={<VideoClassesPage />} />
+          <Route path="/reservations" element={<ReservationsPage />} />
+          <Route path="/talent/:id" element={<TalentDetailPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
