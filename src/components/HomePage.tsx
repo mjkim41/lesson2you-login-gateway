@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video } from "lucide-react";
+import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 
 const HomePage: React.FC = () => {
@@ -18,34 +17,67 @@ const HomePage: React.FC = () => {
     { id: 4, name: "상담", icon: <HeartHandshake size={24} />, count: 54 }
   ];
 
-  // Featured talent donations
-  const featuredDonations = [
+  // Featured talent donations with likes and ratings
+  const [featuredDonations, setFeaturedDonations] = useState([
     {
       id: 1,
       title: "청소년 코딩 멘토링",
       category: "교육",
       provider: "김민준",
-      image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+      image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      liked: false,
+      rating: 4.8,
+      ratingCount: 24,
+      isFriend: true
     },
     {
       id: 2,
       title: "UX/UI 디자인 기초 지도",
       category: "디자인",
       provider: "이지현",
-      image: "https://images.unsplash.com/photo-1542744094-3a99818b5d9e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+      image: "https://images.unsplash.com/photo-1542744094-3a99818b5d9e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      liked: false,
+      rating: 4.5,
+      ratingCount: 18,
+      isFriend: false
     },
     {
       id: 3,
       title: "진로 상담 및 멘토링",
       category: "상담",
       provider: "박서연",
-      image: "https://images.unsplash.com/photo-1573497161161-c3e73707e25c?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80"
+      image: "https://images.unsplash.com/photo-1573497161161-c3e73707e25c?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      liked: false,
+      rating: 4.9,
+      ratingCount: 32,
+      isFriend: true
     }
-  ];
+  ]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Toggle like function
+  const toggleLike = (id: number) => {
+    setFeaturedDonations(donations => 
+      donations.map(donation => 
+        donation.id === id 
+          ? { ...donation, liked: !donation.liked } 
+          : donation
+      )
+    );
+    
+    const donation = featuredDonations.find(d => d.id === id);
+    const action = donation?.liked ? '찜 해제' : '찜하기';
+    toast.success(`${donation?.title}를 ${action}했습니다.`);
+  };
+
+  // Rate donation function
+  const rateDonation = (id: number, rating: number) => {
+    // In a real app, this would be an API call
+    toast.success(`${rating}점을 평가해주셨습니다. 감사합니다!`);
+  };
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,8 +92,18 @@ const HomePage: React.FC = () => {
     navigate("/login");
   };
 
-  const goToVideoSchedule = () => {
-    navigate("/video-schedule");
+  const goToVideoSchedule = (donationId: number) => {
+    const donation = featuredDonations.find(d => d.id === donationId);
+    
+    if (donation?.isFriend) {
+      navigate("/video-schedule", { state: { donationId, providerName: donation.provider } });
+    } else {
+      toast.error("친구 관계인 재능 기부자와만 화상 미팅을 예약할 수 있습니다.");
+    }
+  };
+
+  const goToFriends = () => {
+    navigate("/friends");
   };
 
   return (
@@ -84,6 +126,12 @@ const HomePage: React.FC = () => {
                   className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
                 >
                   <Video size={16} /> 화상 수업
+                </button>
+                <button 
+                  onClick={goToFriends}
+                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
+                >
+                  <UserPlus size={16} /> 친구 관리
                 </button>
               </div>
             </div>
@@ -178,7 +226,7 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* 특징 재능 나눔 섹션 */}
+        {/* 특징 재능 나눔 섹션 - 찜하기 및 평점 추가 */}
         <section className={`py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <div className="container mx-auto">
             <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">주목할 만한 재능 나눔</h2>
@@ -188,12 +236,19 @@ const HomePage: React.FC = () => {
                   key={donation.id}
                   className={`bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fade-in delay-${index * 100}`}
                 >
-                  <div className="h-48 overflow-hidden">
+                  <div className="relative h-48 overflow-hidden">
                     <img 
                       src={donation.image} 
                       alt={donation.title} 
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
+                    <button 
+                      onClick={() => toggleLike(donation.id)}
+                      className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
+                      aria-label={donation.liked ? "찜 해제" : "찜하기"}
+                    >
+                      <Heart size={20} className={`${donation.liked ? 'fill-red-500 text-red-500' : 'text-gray-500'}`} />
+                    </button>
                   </div>
                   <div className="p-6">
                     <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-3">
@@ -201,9 +256,43 @@ const HomePage: React.FC = () => {
                     </span>
                     <h3 className="text-lg font-semibold mb-2">{donation.title}</h3>
                     <p className="text-gray-600 text-sm">by {donation.provider}</p>
-                    <button className="mt-4 w-full py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
-                      자세히 보기
-                    </button>
+                    
+                    {/* 평점 표시 */}
+                    <div className="flex items-center mt-2">
+                      <div className="flex items-center">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <button 
+                            key={star} 
+                            onClick={() => rateDonation(donation.id, star)}
+                            className="p-0.5 focus:outline-none"
+                          >
+                            <Star 
+                              size={16} 
+                              className={`${star <= Math.round(donation.rating) ? 'fill-yellow-400 text-yellow-400' : 'text-gray-300'}`} 
+                            />
+                          </button>
+                        ))}
+                      </div>
+                      <span className="ml-2 text-sm text-gray-600">
+                        {donation.rating} ({donation.ratingCount})
+                      </span>
+                    </div>
+                    
+                    <div className="flex gap-2 mt-4">
+                      <button className="flex-1 py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                        자세히 보기
+                      </button>
+                      <button 
+                        onClick={() => goToVideoSchedule(donation.id)}
+                        className={`flex items-center justify-center px-3 py-2 rounded-md transition-colors
+                          ${donation.isFriend 
+                            ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white' 
+                            : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                        disabled={!donation.isFriend}
+                      >
+                        <Video size={18} />
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}

@@ -10,6 +10,7 @@ import LoginPage from "./components/LoginPage";
 import MessagesPage from "./pages/MessagesPage";
 import VideoSchedulePage from "./pages/VideoSchedulePage";
 import VideoChatPage from "./pages/VideoChatPage";
+import FriendsPage from "./pages/FriendsPage";
 import "./animations.css";
 
 const queryClient = new QueryClient();
@@ -26,6 +27,7 @@ const App = () => (
           <Route path="/messages" element={<MessagesPage />} />
           <Route path="/video-schedule" element={<VideoSchedulePage />} />
           <Route path="/video-chat" element={<VideoChatPage />} />
+          <Route path="/friends" element={<FriendsPage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

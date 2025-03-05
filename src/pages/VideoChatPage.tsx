@@ -1,290 +1,273 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { 
-  ArrowLeft, Mic, MicOff, Video, VideoOff, PhoneOff, MessageSquare, 
-  Users, Share, MoreVertical, Send, Plus, Smile
-} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { ArrowLeft, Send, Mic, MicOff, Video as VideoIcon, VideoOff, Share, Phone, MessageSquare, X } from "lucide-react";
 import { toast } from "sonner";
 
 const VideoChatPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [showChat, setShowChat] = useState(false);
   const [message, setMessage] = useState("");
-  const localVideoRef = useRef<HTMLVideoElement>(null);
-  const remoteVideoRef = useRef<HTMLVideoElement>(null);
+  const [messages, setMessages] = useState<{id: number, sender: string, text: string, timestamp: Date}[]>([]);
+  const [callTime, setCallTime] = useState(0);
   const chatContainerRef = useRef<HTMLDivElement>(null);
-
-  // 샘플 채팅 메시지
-  const [chatMessages, setChatMessages] = useState([
-    { id: 1, sender: "김민준", text: "안녕하세요! 오늘 코딩 멘토링 시간입니다.", time: "10:01", isMe: false },
-    { id: 2, sender: "나", text: "네, 안녕하세요! 잘 부탁드립니다.", time: "10:02", isMe: true },
-    { id: 3, sender: "김민준", text: "오늘은 React 컴포넌트 설계에 대해 알아볼까요?", time: "10:03", isMe: false },
-  ]);
-
-  // 웹캠 설정 (실제 앱에서는 WebRTC를 사용하겠지만, 여기서는 간단히 로컬 웹캠만 표시)
+  
+  // 상대방 정보
+  const mentorName = location.state?.mentorName || "김민준";
+  
+  // 통화 시간 타이머
   useEffect(() => {
-    const setupCamera = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ 
-          video: true, 
-          audio: true 
-        });
-        
-        if (localVideoRef.current) {
-          localVideoRef.current.srcObject = stream;
-        }
-        
-        // 실제 앱에서는 여기서 WebRTC 연결을 설정하고
-        // remoteVideoRef에 원격 스트림을 연결합니다
-        
-        // 데모용 지연 시뮬레이션 - 실제 구현에서는 제거
-        setTimeout(() => {
-          toast.success("김민준님과 연결되었습니다!");
-        }, 2000);
-        
-      } catch (error) {
-        console.error("카메라 또는 마이크를 사용할 수 없습니다:", error);
-        toast.error("카메라 또는 마이크를 사용할 수 없습니다. 권한을 확인해주세요.");
-      }
-    };
+    const timer = setInterval(() => {
+      setCallTime(prev => prev + 1);
+    }, 1000);
     
-    setupCamera();
-    
-    // 컴포넌트 언마운트 시 스트림 정리
-    return () => {
-      if (localVideoRef.current && localVideoRef.current.srcObject) {
-        const stream = localVideoRef.current.srcObject as MediaStream;
-        stream.getTracks().forEach(track => track.stop());
-      }
-    };
+    return () => clearInterval(timer);
   }, []);
   
-  // 채팅창 자동 스크롤
+  // 페이지 로드 시 인사 메시지 자동 추가
+  useEffect(() => {
+    // 1초 후 상대방 인사 메시지
+    setTimeout(() => {
+      addMessage({
+        id: Date.now(),
+        sender: mentorName,
+        text: "안녕하세요! 화상 수업에 오신 것을 환영합니다. 오늘은 어떤 주제에 대해 이야기해 볼까요?",
+        timestamp: new Date()
+      });
+    }, 1000);
+  }, [mentorName]);
+  
+  // 새 메시지 추가 시 스크롤 맨 아래로
   useEffect(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [chatMessages, isChatOpen]);
-
-  const toggleMute = () => {
-    setIsMuted(!isMuted);
-    // 실제 앱에서는 여기서 실제 오디오 트랙 상태를 변경합니다
-    toast.info(isMuted ? "마이크가 켜졌습니다." : "마이크가 꺼졌습니다.");
+  }, [messages]);
+  
+  // 메시지 추가 함수
+  const addMessage = (newMessage: {id: number, sender: string, text: string, timestamp: Date}) => {
+    setMessages(prev => [...prev, newMessage]);
   };
-
-  const toggleVideo = () => {
-    setIsVideoOff(!isVideoOff);
-    // 실제 앱에서는 여기서 실제 비디오 트랙 상태를 변경합니다
-    toast.info(isVideoOff ? "비디오가 켜졌습니다." : "비디오가 꺼졌습니다.");
-  };
-
-  const endCall = () => {
-    // 실제 앱에서는 여기서 연결을 종료합니다
-    toast.info("통화가 종료되었습니다.");
-    navigate("/");
-  };
-
+  
+  // 메시지 전송 함수
   const sendMessage = (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (message.trim()) {
-      const newMessage = {
-        id: chatMessages.length + 1,
+      // 내 메시지 추가
+      addMessage({
+        id: Date.now(),
         sender: "나",
         text: message,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isMe: true
-      };
-      setChatMessages([...chatMessages, newMessage]);
+        timestamp: new Date()
+      });
+      
       setMessage("");
       
-      // 응답 시뮬레이션 (실제 앱에서는 실시간 메시지 수신 로직으로 대체)
+      // 상대방 응답 시뮬레이션 (1~3초 후)
+      const responses = [
+        "네, 계속해서 말씀해주세요. 잘 듣고 있습니다.",
+        "흥미로운 질문이네요! 생각해볼 만한 주제입니다.",
+        "좋은 지적입니다. 그런 관점으로 생각해보지 않았어요.",
+        "제가 알기로는 그 부분에 대해서는 이렇게 접근하는 것이 좋습니다.",
+        "더 자세히 설명해 드릴까요?",
+      ];
+      
       setTimeout(() => {
-        const response = {
-          id: chatMessages.length + 2,
-          sender: "김민준",
-          text: "네, 알겠습니다. 그 부분에 대해 좀 더 자세히 설명해 드릴게요.",
-          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-          isMe: false
-        };
-        setChatMessages(prev => [...prev, response]);
-      }, 3000);
+        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
+        addMessage({
+          id: Date.now(),
+          sender: mentorName,
+          text: randomResponse,
+          timestamp: new Date()
+        });
+      }, 1000 + Math.random() * 2000);
     }
+  };
+  
+  // 통화 종료 함수
+  const endCall = () => {
+    const confirmEnd = window.confirm("통화를 종료하시겠습니까?");
+    if (confirmEnd) {
+      toast.info("통화가 종료되었습니다.");
+      navigate("/");
+    }
+  };
+  
+  // 통화 시간 포맷팅
+  const formatCallTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900">
-      {/* 상단 네비게이션 */}
-      <div className="bg-gray-800 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center">
-          <button 
-            onClick={() => navigate(-1)}
-            className="mr-3 p-1.5 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors text-white"
-            aria-label="뒤로 가기"
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <div>
-            <h1 className="text-white font-medium">화상 미팅</h1>
-            <p className="text-gray-400 text-xs">김민준님과 통화 중</p>
+    <div className="min-h-screen bg-gray-900 flex flex-col">
+      {/* 헤더 */}
+      <header className="bg-gray-800 shadow-md">
+        <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center">
+            <button 
+              onClick={() => navigate(-1)}
+              className="mr-3 p-2 rounded-full text-gray-300 hover:bg-gray-700 transition-colors"
+              aria-label="뒤로 가기"
+            >
+              <ArrowLeft size={20} />
+            </button>
+            <h1 className="text-lg font-semibold text-white">화상 수업</h1>
+          </div>
+          <div className="flex items-center">
+            <span className="text-white bg-primary/20 rounded-full px-3 py-1 text-sm font-mono">
+              {formatCallTime(callTime)}
+            </span>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors text-white">
-            <Users size={18} />
-          </button>
-          <button className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors text-white">
-            <Share size={18} />
-          </button>
-          <button className="p-1.5 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors text-white">
-            <MoreVertical size={18} />
-          </button>
+      </header>
+
+      {/* 메인 콘텐츠 */}
+      <div className="flex-1 flex flex-col md:flex-row">
+        {/* 비디오 영역 */}
+        <div className={`flex-1 relative ${showChat ? 'hidden md:block' : 'block'}`}>
+          {/* 메인 비디오 (상대방) */}
+          <div className="absolute inset-0 p-4">
+            <div className="w-full h-full rounded-xl overflow-hidden bg-gray-800 flex items-center justify-center">
+              {!isVideoOff ? (
+                <img 
+                  src="https://i.pravatar.cc/150?img=1" 
+                  alt="상대방 화면" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center text-gray-400">
+                  <VideoOff size={48} className="mx-auto mb-2" />
+                  <p>상대방 비디오가 꺼져 있습니다</p>
+                </div>
+              )}
+              <div className="absolute top-4 left-4 bg-black/40 text-white px-3 py-1 rounded-full text-sm backdrop-blur-sm">
+                {mentorName}
+              </div>
+            </div>
+          </div>
+          
+          {/* 소형 비디오 (나) */}
+          <div className="absolute bottom-8 right-8 w-40 h-40 md:w-48 md:h-48 rounded-lg overflow-hidden border-2 border-white shadow-lg">
+            <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+              {!isVideoOff ? (
+                <img 
+                  src="https://i.pravatar.cc/150?img=5" 
+                  alt="내 화면" 
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="text-center text-gray-300">
+                  <VideoOff size={24} className="mx-auto mb-1" />
+                  <p className="text-xs">비디오 꺼짐</p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      </div>
-      
-      {/* 비디오 영역 */}
-      <div className="flex-1 flex relative">
-        {/* 메인 비디오 (상대방) */}
-        <div className="w-full h-full bg-black flex items-center justify-center">
-          <video 
-            ref={remoteVideoRef}
-            className="w-full h-full object-cover"
-            autoPlay
-            playsInline
-            muted // 실제 앱에서는 muted 속성 제거
+        
+        {/* 채팅 영역 */}
+        <div 
+          className={`${showChat ? 'block' : 'hidden md:block'} w-full md:w-96 bg-white border-l border-gray-200 flex flex-col h-full md:h-[calc(100vh-64px)]`}
+        >
+          <div className="p-3 border-b border-gray-200 flex justify-between items-center">
+            <h2 className="font-medium">실시간 채팅</h2>
+            <button 
+              onClick={() => setShowChat(false)}
+              className="md:hidden p-1 rounded-full hover:bg-gray-100 transition-colors"
+            >
+              <X size={18} />
+            </button>
+          </div>
+          
+          {/* 메시지 목록 */}
+          <div 
+            ref={chatContainerRef}
+            className="flex-1 overflow-y-auto p-4 space-y-3"
           >
-            {/* 비디오가 없을 때 대체 콘텐츠 */}
-            {isVideoOff && (
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="bg-gray-700 rounded-full p-10">
-                  <Users size={48} className="text-white" />
+            {messages.map((msg) => (
+              <div 
+                key={msg.id}
+                className={`flex ${msg.sender === "나" ? 'justify-end' : 'justify-start'}`}
+              >
+                <div 
+                  className={`max-w-[75%] rounded-lg px-3 py-2 ${
+                    msg.sender === "나" 
+                      ? 'bg-primary text-white rounded-tr-none' 
+                      : 'bg-gray-100 text-gray-800 rounded-tl-none'
+                  }`}
+                >
+                  <p className="text-sm">{msg.text}</p>
+                  <p className="text-xs opacity-70 mt-1 text-right">
+                    {msg.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                  </p>
                 </div>
               </div>
-            )}
-          </video>
+            ))}
+          </div>
           
-          {/* 상대방 이름 */}
-          <div className="absolute bottom-5 left-5 bg-black/50 px-3 py-1 rounded-lg text-white text-sm">
-            김민준
-          </div>
-        </div>
-        
-        {/* 자신의 비디오 (PIP) */}
-        <div className="absolute bottom-5 right-5 w-40 h-28 md:w-64 md:h-44 rounded-lg overflow-hidden border-2 border-gray-800 shadow-lg">
-          <video 
-            ref={localVideoRef}
-            className={`w-full h-full object-cover ${isVideoOff ? 'hidden' : 'block'}`}
-            autoPlay
-            playsInline
-            muted
-          />
-          {isVideoOff && (
-            <div className="w-full h-full bg-gray-800 flex items-center justify-center">
-              <Users size={32} className="text-white" />
-            </div>
-          )}
-        </div>
-        
-        {/* 채팅 사이드바 (열릴 때만 표시) */}
-        {isChatOpen && (
-          <div className="absolute top-0 right-0 bottom-0 w-80 bg-white shadow-lg flex flex-col h-full">
-            <div className="p-3 border-b flex justify-between items-center">
-              <h3 className="font-medium">채팅</h3>
-              <button 
-                onClick={() => setIsChatOpen(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
-                <ArrowLeft size={16} />
-              </button>
-            </div>
-            
-            {/* 메시지 영역 */}
-            <div 
-              ref={chatContainerRef}
-              className="flex-1 overflow-y-auto p-3 space-y-3"
+          {/* 메시지 입력 */}
+          <form onSubmit={sendMessage} className="p-3 border-t border-gray-200 flex items-center">
+            <input
+              type="text"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              placeholder="메시지 입력..."
+              className="flex-1 border border-gray-300 rounded-l-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-primary"
+            />
+            <button 
+              type="submit"
+              className="bg-primary text-white rounded-r-lg px-3 py-2"
             >
-              {chatMessages.map((msg) => (
-                <div 
-                  key={msg.id} 
-                  className={`flex ${msg.isMe ? 'justify-end' : 'justify-start'}`}
-                >
-                  <div 
-                    className={`max-w-[75%] rounded-lg p-2 ${
-                      msg.isMe 
-                        ? 'bg-primary text-white rounded-tr-none' 
-                        : 'bg-gray-100 text-gray-800 rounded-tl-none'
-                    }`}
-                  >
-                    {!msg.isMe && <p className="text-xs font-medium mb-1">{msg.sender}</p>}
-                    <p className="text-sm">{msg.text}</p>
-                    <p className={`text-xs mt-1 ${msg.isMe ? 'text-blue-100' : 'text-gray-500'}`}>
-                      {msg.time}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            
-            {/* 메시지 입력 */}
-            <form onSubmit={sendMessage} className="p-3 border-t flex items-center gap-2">
-              <button 
-                type="button"
-                className="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              >
-                <Plus size={18} />
-              </button>
-              <input
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="메시지 입력..."
-                className="flex-1 py-2 px-3 border rounded-full focus:ring-1 focus:ring-primary focus:border-primary"
-              />
-              <button 
-                type="button"
-                className="p-1.5 rounded-full text-gray-500 hover:text-gray-700 hover:bg-gray-100"
-              >
-                <Smile size={18} />
-              </button>
-              <button 
-                type="submit"
-                className="p-1.5 rounded-full bg-primary text-white hover:bg-primary/90"
-              >
-                <Send size={18} />
-              </button>
-            </form>
-          </div>
-        )}
+              <Send size={18} />
+            </button>
+          </form>
+        </div>
       </div>
-      
-      {/* 하단 컨트롤 */}
-      <div className="bg-gray-800 px-6 py-4 flex items-center justify-center gap-4">
-        <button 
-          onClick={toggleMute}
-          className={`p-3 rounded-full ${isMuted ? 'bg-red-500' : 'bg-gray-700 hover:bg-gray-600'} transition-colors`}
-        >
-          {isMuted ? <MicOff size={20} className="text-white" /> : <Mic size={20} className="text-white" />}
-        </button>
-        <button 
-          onClick={toggleVideo}
-          className={`p-3 rounded-full ${isVideoOff ? 'bg-red-500' : 'bg-gray-700 hover:bg-gray-600'} transition-colors`}
-        >
-          {isVideoOff ? <VideoOff size={20} className="text-white" /> : <Video size={20} className="text-white" />}
-        </button>
-        <button 
-          onClick={endCall}
-          className="p-3 rounded-full bg-red-500 hover:bg-red-600 transition-colors"
-        >
-          <PhoneOff size={20} className="text-white" />
-        </button>
-        <button 
-          onClick={() => setIsChatOpen(!isChatOpen)}
-          className={`p-3 rounded-full ${isChatOpen ? 'bg-primary' : 'bg-gray-700 hover:bg-gray-600'} transition-colors`}
-        >
-          <MessageSquare size={20} className="text-white" />
-        </button>
+
+      {/* 컨트롤 패널 */}
+      <div className="bg-gray-800 py-4">
+        <div className="container mx-auto flex items-center justify-center space-x-4">
+          <button 
+            onClick={() => setIsMuted(!isMuted)}
+            className={`p-3 rounded-full ${isMuted ? 'bg-red-500' : 'bg-gray-700'} text-white`}
+          >
+            {isMuted ? <MicOff size={24} /> : <Mic size={24} />}
+          </button>
+          
+          <button 
+            onClick={() => setIsVideoOff(!isVideoOff)}
+            className={`p-3 rounded-full ${isVideoOff ? 'bg-red-500' : 'bg-gray-700'} text-white`}
+          >
+            {isVideoOff ? <VideoOff size={24} /> : <VideoIcon size={24} />}
+          </button>
+          
+          <button 
+            onClick={() => setShowChat(!showChat)}
+            className={`p-3 rounded-full ${showChat ? 'bg-primary' : 'bg-gray-700'} text-white md:hidden`}
+          >
+            <MessageSquare size={24} />
+          </button>
+          
+          <button 
+            className="p-3 rounded-full bg-gray-700 text-white"
+            onClick={() => toast.info("화면 공유 기능은 추후 업데이트 예정입니다.")}
+          >
+            <Share size={24} />
+          </button>
+          
+          <button 
+            onClick={endCall}
+            className="p-3 rounded-full bg-red-500 text-white"
+          >
+            <Phone size={24} />
+          </button>
+        </div>
       </div>
     </div>
   );
