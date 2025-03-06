@@ -16,6 +16,7 @@ import TalentRegisterPage from "./pages/TalentRegisterPage";
 import VideoClassesPage from "./pages/VideoClassesPage";
 import ReservationsPage from "./pages/ReservationsPage";
 import TalentDetailPage from "./pages/TalentDetailPage";
+import MyProfilePage from "./pages/MyProfilePage";
 import "./animations.css";
 
 const queryClient = new QueryClient();
@@ -39,6 +40,7 @@ const App = () => (
           <Route path="/video-classes" element={<VideoClassesPage />} />
           <Route path="/reservations" element={<ReservationsPage />} />
           <Route path="/talent/:id" element={<TalentDetailPage />} />
+          <Route path="/my-profile" element={<MyProfilePage />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

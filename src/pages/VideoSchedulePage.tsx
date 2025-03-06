@@ -1,11 +1,13 @@
+
 import React, { useState } from 'react';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Calendar as CalendarIcon } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Calendar } from 'react-date-range';
-import 'react-date-range/dist/styles.css'; // main style file
-import 'react-date-range/dist/theme/default.css'; // theme css file
-import { addDays, subDays } from 'date-fns';
+import { format, addDays, subDays } from 'date-fns';
 import { toast } from 'sonner';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const VideoSchedulePage: React.FC = () => {
   const navigate = useNavigate();
@@ -17,8 +19,10 @@ const VideoSchedulePage: React.FC = () => {
     '2024-08-10-10:00', '2024-08-10-11:00', '2024-08-11-14:00'
   ]);
 
-  const handleDateChange = (newDate: Date) => {
-    setDate(newDate);
+  const handleDateChange = (newDate: Date | undefined) => {
+    if (newDate) {
+      setDate(newDate);
+    }
   };
 
   const handleTimeChange = (newTime: string) => {
@@ -35,7 +39,7 @@ const VideoSchedulePage: React.FC = () => {
       return;
     }
 
-    const selectedDateTime = `${date.toISOString().split('T')[0]} ${time}`;
+    const selectedDateTime = `${format(date, 'yyyy-MM-dd')} ${time}`;
     toast.success(`${providerName} 님과의 화상 수업이 ${selectedDateTime}에 예약되었습니다!`);
     setTimeout(() => {
       navigate('/video-chat');
@@ -76,18 +80,39 @@ const VideoSchedulePage: React.FC = () => {
               날짜 및 시간 선택
             </h2>
 
-            {/* 달력 */}
+            {/* 날짜 선택 (Shadcn Calendar) */}
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 날짜
               </label>
-              <Calendar
-                date={date || new Date()}
-                onChange={handleDateChange}
-                minDate={subDays(new Date(), 0)}
-                maxDate={addDays(new Date(), 30)}
-                className="w-full"
-              />
+              <div className="w-full">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {date ? format(date, "PPP") : <span>날짜를 선택하세요</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={date || undefined}
+                      onSelect={handleDateChange}
+                      disabled={(date) => 
+                        date < subDays(new Date(), 0) || 
+                        date > addDays(new Date(), 30)
+                      }
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
 
             {/* 시간 선택 */}
@@ -104,7 +129,7 @@ const VideoSchedulePage: React.FC = () => {
                 {generateTimeOptions().map((time) => (
                   <option 
                     key={time} 
-                    disabled={unavailableTimes.includes(date && time ? `${date.toISOString().split('T')[0]}-${time}` : '')}
+                    disabled={unavailableTimes.includes(date && time ? `${format(date, 'yyyy-MM-dd')}-${time}` : '')}
                   >
                     {time}
                   </option>

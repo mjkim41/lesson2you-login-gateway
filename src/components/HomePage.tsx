@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, UserPlus, Code, Book, Music } from "lucide-react";
+import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, User, Code, Book, Music } from "lucide-react";
 import { toast } from "sonner";
 
 const HomePage: React.FC = () => {
@@ -98,8 +99,22 @@ const HomePage: React.FC = () => {
     navigate("/login");
   };
 
-  const goToVideoSchedule = () => {
-    navigate("/video-schedule");
+  const goToMyProfile = () => {
+    navigate("/my-profile");
+    // 여기서는 현재 프로필 페이지가 없어서 임시로 토스트 메시지를 표시합니다
+    toast.info("내 프로필 페이지로 이동합니다.");
+  };
+
+  const goToTalentSearch = () => {
+    navigate("/talent-search");
+  };
+
+  const goToTalentRegister = () => {
+    navigate("/talent-register");
+  };
+
+  const goToMessages = () => {
+    navigate("/messages");
   };
 
   const handleDonationVideoSchedule = (event: React.MouseEvent, donationId: number) => {
@@ -115,10 +130,6 @@ const HomePage: React.FC = () => {
     }
   };
 
-  const goToFriends = () => {
-    navigate("/friends");
-  };
-
   const goToTalentDetail = (id: number) => {
     navigate(`/talent/${id}`);
   };
@@ -132,45 +143,52 @@ const HomePage: React.FC = () => {
             <div className="flex items-center">
               <span className="text-xl font-bold text-primary">재능나눔</span>
             </div>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-center space-x-4">
-                <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">서비스 소개</a>
-                <a 
-                  href="/talent-search" 
-                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  재능 찾기
-                </a>
-                <a 
-                  href="/talent-register" 
-                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  재능 등록
-                </a>
-                <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">커뮤니티</a>
-                <button 
-                  onClick={goToVideoSchedule}
-                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
-                >
-                  <Video size={16} /> 화상 수업
-                </button>
-                <button 
-                  onClick={goToFriends}
-                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
-                >
-                  <UserPlus size={16} /> 친구 관리
-                </button>
-              </div>
+            
+            {/* 주요 메뉴 - 재능찾기, 재능등록만 유지 */}
+            <div className="hidden md:flex items-center space-x-4">
+              <a 
+                href="/talent-search" 
+                className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+                onClick={(e) => {
+                  e.preventDefault();
+                  goToTalentSearch();
+                }}
+              >
+                재능 찾기
+              </a>
+              <a 
+                href="/talent-register" 
+                className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+                onClick={(e) => {
+                  e.preventDefault();
+                  goToTalentRegister();
+                }}
+              >
+                재능 등록
+              </a>
             </div>
+            
+            {/* 아이콘 메뉴 - 메시지함, 내 프로필 */}
             <div className="flex items-center space-x-3">
+              {/* 메시지함 아이콘 */}
               <button 
-                onClick={() => navigate("/messages")}
+                onClick={goToMessages}
                 className="relative p-2 text-gray-700 hover:text-primary rounded-full hover:bg-gray-100 transition-colors"
                 aria-label="메시지함"
               >
                 <MessageSquare size={20} />
                 <span className="absolute top-0 right-0 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">2</span>
               </button>
+              
+              {/* 내 프로필 아이콘 */}
+              <button 
+                onClick={goToMyProfile}
+                className="p-2 text-gray-700 hover:text-primary rounded-full hover:bg-gray-100 transition-colors"
+                aria-label="내 프로필"
+              >
+                <User size={20} />
+              </button>
+              
               <button 
                 onClick={goToLogin}
                 className="bg-primary text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
@@ -182,6 +200,7 @@ const HomePage: React.FC = () => {
         </div>
       </nav>
 
+      {/* 나머지 홈페이지 콘텐츠는 그대로 유지 */}
       <main className="flex-grow pt-16">
         {/* 히어로 섹션 */}
         <section className={`relative py-20 px-4 sm:px-6 lg:px-8 transition-all duration-700 ${mounted ? "opacity-100" : "opacity-0"}`}>
