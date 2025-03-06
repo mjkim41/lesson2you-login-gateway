@@ -1,11 +1,14 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart, Calendar, Clock, CheckCircle, X, MessageSquare } from 'lucide-react';
+import { 
+  ArrowLeft, Heart, Calendar, Clock, CheckCircle, X, 
+  MessageSquare, Bookmark, Video, History 
+} from 'lucide-react';
 import { toast } from 'sonner';
 
 // 탭 인터페이스 정의
-type Tab = 'wishlist' | 'pending' | 'confirmed';
+type Tab = 'wishlist' | 'pending' | 'confirmed' | 'upcoming' | 'past';
 
 const MyProfilePage: React.FC = () => {
   const navigate = useNavigate();
@@ -79,6 +82,52 @@ const MyProfilePage: React.FC = () => {
     }
   ];
 
+  // 예정된 수업 샘플 데이터
+  const upcomingClasses = [
+    {
+      id: 301,
+      title: "리액트 기초 실습",
+      provider: "홍길동",
+      date: "2024-08-22",
+      time: "15:00",
+      duration: "90분",
+      platform: "Zoom"
+    },
+    {
+      id: 302,
+      title: "UI/UX 디자인 트렌드",
+      provider: "이민지",
+      date: "2024-08-27",
+      time: "13:00",
+      duration: "60분",
+      platform: "Google Meet"
+    }
+  ];
+
+  // 지난 수업 샘플 데이터
+  const pastClasses = [
+    {
+      id: 401,
+      title: "SQL 데이터베이스 기초",
+      provider: "김철수",
+      date: "2024-07-15",
+      time: "14:00",
+      duration: "120분",
+      platform: "Zoom",
+      feedback: false
+    },
+    {
+      id: 402,
+      title: "인터랙티브 디자인 워크샵",
+      provider: "장미영",
+      date: "2024-07-20",
+      time: "10:00",
+      duration: "180분",
+      platform: "Google Meet",
+      feedback: true
+    }
+  ];
+
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
   };
@@ -101,6 +150,16 @@ const MyProfilePage: React.FC = () => {
   const handleReservationDetail = (id: number) => {
     // 실제로는 예약 상세 페이지로 이동
     toast.info("예약 상세 정보를 확인합니다.");
+  };
+
+  const handleJoinClass = (id: number) => {
+    // 화상 수업 페이지로 이동
+    navigate('/video-chat', { state: { classId: id } });
+  };
+
+  const handleFeedback = (id: number) => {
+    // 피드백 제출 기능
+    toast.info("피드백을 작성할 수 있는 페이지로 이동합니다.");
   };
 
   return (
@@ -126,33 +185,87 @@ const MyProfilePage: React.FC = () => {
           <div className="flex flex-col md:flex-row">
             {/* 사이드바 */}
             <div className="w-full md:w-64 bg-gray-50 p-4">
-              <div className="flex flex-col space-y-2">
+              {/* 메뉴 그룹: 재능 관리 */}
+              <div className="mb-6">
+                <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2 px-4">재능 관리</h3>
+                <div className="flex flex-col space-y-1">
+                  <button
+                    onClick={() => handleTabChange('wishlist')}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === 'wishlist' ? 'bg-primary text-white' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    <Heart size={18} />
+                    <span>찜한 재능</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 메뉴 그룹: 예약 관리 */}
+              <div className="mb-6">
+                <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2 px-4">예약 관리</h3>
+                <div className="flex flex-col space-y-1">
+                  <button
+                    onClick={() => handleTabChange('pending')}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === 'pending' ? 'bg-primary text-white' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    <Clock size={18} />
+                    <span>대기 중인 예약</span>
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('confirmed')}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === 'confirmed' ? 'bg-primary text-white' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    <CheckCircle size={18} />
+                    <span>확정된 예약</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 메뉴 그룹: 수업 관리 */}
+              <div className="mb-6">
+                <h3 className="text-xs uppercase text-gray-500 font-semibold mb-2 px-4">수업 관리</h3>
+                <div className="flex flex-col space-y-1">
+                  <button
+                    onClick={() => handleTabChange('upcoming')}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === 'upcoming' ? 'bg-primary text-white' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    <Video size={18} />
+                    <span>예정된 수업</span>
+                  </button>
+                  <button
+                    onClick={() => handleTabChange('past')}
+                    className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
+                      activeTab === 'past' ? 'bg-primary text-white' : 'hover:bg-gray-200'
+                    }`}
+                  >
+                    <History size={18} />
+                    <span>지난 수업</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* 바로가기 링크 */}
+              <div className="mt-auto pt-6 border-t border-gray-200">
                 <button
-                  onClick={() => handleTabChange('wishlist')}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'wishlist' ? 'bg-primary text-white' : 'hover:bg-gray-200'
-                  }`}
+                  onClick={() => navigate('/video-classes')}
+                  className="flex items-center space-x-2 px-4 py-3 rounded-lg w-full text-left text-gray-700 hover:bg-gray-200 transition-colors"
                 >
-                  <Heart size={18} />
-                  <span>찜한 재능</span>
+                  <Bookmark size={18} />
+                  <span>화상 수업 탐색</span>
                 </button>
                 <button
-                  onClick={() => handleTabChange('pending')}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'pending' ? 'bg-primary text-white' : 'hover:bg-gray-200'
-                  }`}
+                  onClick={() => navigate('/reservations')}
+                  className="flex items-center space-x-2 px-4 py-3 rounded-lg w-full text-left text-gray-700 hover:bg-gray-200 transition-colors"
                 >
-                  <Clock size={18} />
-                  <span>대기 중인 예약</span>
-                </button>
-                <button
-                  onClick={() => handleTabChange('confirmed')}
-                  className={`flex items-center space-x-2 px-4 py-3 rounded-lg transition-colors ${
-                    activeTab === 'confirmed' ? 'bg-primary text-white' : 'hover:bg-gray-200'
-                  }`}
-                >
-                  <CheckCircle size={18} />
-                  <span>확정된 예약</span>
+                  <Calendar size={18} />
+                  <span>예약 관리</span>
                 </button>
               </div>
             </div>
@@ -298,6 +411,112 @@ const MyProfilePage: React.FC = () => {
                                 className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors"
                               >
                                 화상 수업
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 예정된 수업 */}
+              {activeTab === 'upcoming' && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">예정된 수업</h2>
+                  {upcomingClasses.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      예정된 수업이 없습니다.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {upcomingClasses.map(classItem => (
+                        <div key={classItem.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between">
+                            <div>
+                              <h3 className="font-medium">{classItem.title}</h3>
+                              <p className="text-sm text-gray-600">by {classItem.provider}</p>
+                              <div className="flex items-center mt-2 text-sm">
+                                <Calendar size={16} className="mr-1 text-gray-500" />
+                                <span>{classItem.date} {classItem.time}</span>
+                              </div>
+                              <div className="flex items-center mt-1 text-sm">
+                                <Clock size={16} className="mr-1 text-gray-500" />
+                                <span>진행 시간: {classItem.duration}</span>
+                              </div>
+                              <span className="inline-block px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mt-2">
+                                {classItem.platform}
+                              </span>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              <button
+                                onClick={() => handleJoinClass(classItem.id)}
+                                className="px-3 py-1 text-xs bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                              >
+                                수업 입장
+                              </button>
+                              <button
+                                onClick={() => handleMessageProvider(classItem.provider)}
+                                className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors"
+                              >
+                                메시지 보내기
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 지난 수업 */}
+              {activeTab === 'past' && (
+                <div>
+                  <h2 className="text-xl font-semibold mb-4">지난 수업</h2>
+                  {pastClasses.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">
+                      지난 수업 내역이 없습니다.
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {pastClasses.map(classItem => (
+                        <div key={classItem.id} className="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                          <div className="flex justify-between">
+                            <div>
+                              <h3 className="font-medium">{classItem.title}</h3>
+                              <p className="text-sm text-gray-600">by {classItem.provider}</p>
+                              <div className="flex items-center mt-2 text-sm">
+                                <Calendar size={16} className="mr-1 text-gray-500" />
+                                <span>{classItem.date} {classItem.time}</span>
+                              </div>
+                              <div className="flex items-center mt-1 text-sm">
+                                <Clock size={16} className="mr-1 text-gray-500" />
+                                <span>진행 시간: {classItem.duration}</span>
+                              </div>
+                              <span className="inline-block px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full mt-2">
+                                수업 완료
+                              </span>
+                            </div>
+                            <div className="flex flex-col space-y-2">
+                              {!classItem.feedback ? (
+                                <button
+                                  onClick={() => handleFeedback(classItem.id)}
+                                  className="px-3 py-1 text-xs bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                                >
+                                  피드백 작성
+                                </button>
+                              ) : (
+                                <span className="px-3 py-1 text-xs bg-gray-100 text-gray-800 rounded-md">
+                                  피드백 완료
+                                </span>
+                              )}
+                              <button
+                                onClick={() => handleMessageProvider(classItem.provider)}
+                                className="px-3 py-1 text-xs bg-primary/10 text-primary rounded-md hover:bg-primary/20 transition-colors"
+                              >
+                                메시지 보내기
                               </button>
                             </div>
                           </div>
