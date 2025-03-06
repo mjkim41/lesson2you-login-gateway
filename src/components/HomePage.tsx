@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, UserPlus } from "lucide-react";
+import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, UserPlus, Code, Book, Music } from "lucide-react";
 import { toast } from "sonner";
 
 const HomePage: React.FC = () => {
@@ -17,7 +17,7 @@ const HomePage: React.FC = () => {
     { id: 4, name: "상담", icon: <HeartHandshake size={24} />, count: 54 }
   ];
 
-  // Featured talent donations with likes and ratings
+  // Featured talent exchanges with likes, ratings and desired talents in return
   const [featuredDonations, setFeaturedDonations] = useState([
     {
       id: 1,
@@ -28,7 +28,9 @@ const HomePage: React.FC = () => {
       liked: false,
       rating: 4.8,
       ratingCount: 24,
-      isFriend: true
+      isFriend: true,
+      wantedTalent: "음악 레슨", // 받고 싶은 재능
+      wantedIcon: <Music size={18} /> // 받고 싶은 재능 아이콘
     },
     {
       id: 2,
@@ -39,7 +41,9 @@ const HomePage: React.FC = () => {
       liked: false,
       rating: 4.5,
       ratingCount: 18,
-      isFriend: false
+      isFriend: false,
+      wantedTalent: "프로그래밍 도움", // 받고 싶은 재능
+      wantedIcon: <Code size={18} /> // 받고 싶은 재능 아이콘
     },
     {
       id: 3,
@@ -50,7 +54,9 @@ const HomePage: React.FC = () => {
       liked: false,
       rating: 4.9,
       ratingCount: 32,
-      isFriend: true
+      isFriend: true,
+      wantedTalent: "영어 회화 연습", // 받고 싶은 재능
+      wantedIcon: <Book size={18} /> // 받고 싶은 재능 아이콘
     }
   ]);
 
@@ -92,7 +98,14 @@ const HomePage: React.FC = () => {
     navigate("/login");
   };
 
-  const goToVideoSchedule = (donationId: number) => {
+  const goToVideoSchedule = () => {
+    navigate("/video-schedule");
+  };
+
+  const handleDonationVideoSchedule = (event: React.MouseEvent, donationId: number) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
     const donation = featuredDonations.find(d => d.id === donationId);
     
     if (donation?.isFriend) {
@@ -104,6 +117,10 @@ const HomePage: React.FC = () => {
 
   const goToFriends = () => {
     navigate("/friends");
+  };
+
+  const goToTalentDetail = (id: number) => {
+    navigate(`/talent/${id}`);
   };
 
   return (
@@ -118,8 +135,18 @@ const HomePage: React.FC = () => {
             <div className="hidden md:block">
               <div className="ml-10 flex items-center space-x-4">
                 <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">서비스 소개</a>
-                <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">재능 찾기</a>
-                <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">재능 등록</a>
+                <a 
+                  href="/talent-search" 
+                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  재능 찾기
+                </a>
+                <a 
+                  href="/talent-register" 
+                  className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  재능 등록
+                </a>
                 <a href="#" className="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">커뮤니티</a>
                 <button 
                   onClick={goToVideoSchedule}
@@ -166,7 +193,7 @@ const HomePage: React.FC = () => {
               <br /> 세상을 변화시키세요
             </h1>
             <p className="text-xl text-gray-600 max-w-2xl mx-auto mb-10">
-              전문 지식과 기술을 나누며 더 나은 사회를 함께 만들어 가는 재능 나눔 플랫폼입니다
+              전문 지식과 기술을 나누고 교환하며 더 나은 사회를 함께 만들어 가는 재능 교환 플랫폼입니다
             </p>
             
             {/* 검색 폼 */}
@@ -226,15 +253,16 @@ const HomePage: React.FC = () => {
           </div>
         </section>
 
-        {/* 특징 재능 나눔 섹션 - 찜하기 및 평점 추가 */}
+        {/* 특징 재능 교환 섹션 - 찜하기, 평점 및 원하는 재능 추가 */}
         <section className={`py-16 px-4 sm:px-6 lg:px-8 bg-gray-50 transition-all duration-700 delay-300 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <div className="container mx-auto">
-            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">주목할 만한 재능 나눔</h2>
+            <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">주목할 만한 재능 교환</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {featuredDonations.map((donation, index) => (
                 <div 
                   key={donation.id}
                   className={`bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fade-in delay-${index * 100}`}
+                  onClick={() => goToTalentDetail(donation.id)}
                 >
                   <div className="relative h-48 overflow-hidden">
                     <img 
@@ -243,7 +271,10 @@ const HomePage: React.FC = () => {
                       className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                     />
                     <button 
-                      onClick={() => toggleLike(donation.id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        toggleLike(donation.id);
+                      }}
                       className="absolute top-4 right-4 p-2 bg-white/80 backdrop-blur-sm rounded-full shadow-md hover:bg-white transition-colors"
                       aria-label={donation.liked ? "찜 해제" : "찜하기"}
                     >
@@ -251,9 +282,18 @@ const HomePage: React.FC = () => {
                     </button>
                   </div>
                   <div className="p-6">
-                    <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-3">
-                      {donation.category}
-                    </span>
+                    <div className="flex justify-between items-start mb-3">
+                      <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                        {donation.category}
+                      </span>
+                      
+                      {/* 교환 원하는 재능 표시 */}
+                      <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs">
+                        {donation.wantedIcon}
+                        <span>{donation.wantedTalent}</span>
+                      </div>
+                    </div>
+                    
                     <h3 className="text-lg font-semibold mb-2">{donation.title}</h3>
                     <p className="text-gray-600 text-sm">by {donation.provider}</p>
                     
@@ -263,7 +303,10 @@ const HomePage: React.FC = () => {
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button 
                             key={star} 
-                            onClick={() => rateDonation(donation.id, star)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              rateDonation(donation.id, star);
+                            }}
                             className="p-0.5 focus:outline-none"
                           >
                             <Star 
@@ -279,11 +322,17 @@ const HomePage: React.FC = () => {
                     </div>
                     
                     <div className="flex gap-2 mt-4">
-                      <button className="flex-1 py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors">
+                      <button 
+                        className="flex-1 py-2 border border-primary text-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          goToTalentDetail(donation.id);
+                        }}
+                      >
                         자세히 보기
                       </button>
                       <button 
-                        onClick={() => goToVideoSchedule(donation.id)}
+                        onClick={(e) => handleDonationVideoSchedule(e, donation.id)}
                         className={`flex items-center justify-center px-3 py-2 rounded-md transition-colors
                           ${donation.isFriend 
                             ? 'bg-primary/10 text-primary hover:bg-primary hover:text-white' 
@@ -298,8 +347,11 @@ const HomePage: React.FC = () => {
               ))}
             </div>
             <div className="text-center mt-12">
-              <button className="inline-flex items-center px-6 py-3 bg-transparent text-primary font-medium border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-colors">
-                <span>모든 재능 나눔 보기</span>
+              <button 
+                onClick={() => navigate('/talent-search')}
+                className="inline-flex items-center px-6 py-3 bg-transparent text-primary font-medium border-2 border-primary rounded-md hover:bg-primary hover:text-white transition-colors"
+              >
+                <span>모든 재능 교환 보기</span>
                 <ArrowRight size={16} className="ml-2" />
               </button>
             </div>
@@ -310,15 +362,15 @@ const HomePage: React.FC = () => {
         <section className={`py-20 px-4 sm:px-6 lg:px-8 transition-all duration-700 delay-400 ${mounted ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"}`}>
           <div className="container mx-auto text-center">
             <div className="max-w-3xl mx-auto glass-panel p-10 rounded-2xl">
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">재능을 나눌 준비가 되셨나요?</h2>
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">재능을 교환할 준비가 되셨나요?</h2>
               <p className="text-lg text-gray-600 mb-8">
-                작은 재능도 누군가에게는 큰 도움이 됩니다.<br />
-                당신의 전문성과 경험을 필요한 곳에 나눠보세요.
+                당신의 재능을 공유하고, 필요한 다른 재능을 얻어보세요.<br />
+                함께 성장하는 새로운 방식의 교환 문화에 참여하세요.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <button 
                   className="px-6 py-3 bg-primary text-white font-medium rounded-md hover:bg-primary/90 transition-colors w-full sm:w-auto"
-                  onClick={() => toast.success("재능 등록 페이지로 이동합니다!")}
+                  onClick={() => navigate('/talent-register')}
                 >
                   재능 등록하기
                 </button>
@@ -339,17 +391,17 @@ const HomePage: React.FC = () => {
         <div className="container mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4">재능나눔</h3>
+              <h3 className="text-lg font-semibold mb-4">재능교환</h3>
               <p className="text-gray-400 text-sm">
-                더 나은 사회를 위한 재능 기부 플랫폼입니다.<br />
+                더 나은 사회를 위한 재능 교환 플랫폼입니다.<br />
                 함께 만들어가는 따뜻한 세상을 꿈꿉니다.
               </p>
             </div>
             <div>
               <h3 className="text-lg font-semibold mb-4">서비스</h3>
               <ul className="space-y-2 text-gray-400">
-                <li><a href="#" className="hover:text-white transition-colors">재능 찾기</a></li>
-                <li><a href="#" className="hover:text-white transition-colors">재능 등록</a></li>
+                <li><a href="/talent-search" className="hover:text-white transition-colors">재능 찾기</a></li>
+                <li><a href="/talent-register" className="hover:text-white transition-colors">재능 등록</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">커뮤니티</a></li>
                 <li><a href="#" className="hover:text-white transition-colors">성공 사례</a></li>
               </ul>
@@ -373,7 +425,7 @@ const HomePage: React.FC = () => {
             </div>
           </div>
           <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400 text-sm">
-            <p>&copy; 2023 재능나눔. All rights reserved.</p>
+            <p>&copy; 2023 재능교환. All rights reserved.</p>
           </div>
         </div>
       </footer>
