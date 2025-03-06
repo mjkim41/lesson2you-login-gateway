@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowRight, Search, Gift, Users, HeartHandshake, Sparkles, MessageSquare, Video, Heart, Star, User, Code, Book, Music } from "lucide-react";
@@ -24,12 +23,14 @@ const HomePage: React.FC = () => {
       id: 1,
       title: "청소년 코딩 멘토링",
       category: "교육",
+      subCategory: "고등학습",
       provider: "김민준",
       image: "https://images.unsplash.com/photo-1515378791036-0648a3ef77b2?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
       liked: false,
       rating: 4.8,
       ratingCount: 24,
       isFriend: true,
+      talentType: "give", // 제공하는 재능
       wantedTalent: "음악 레슨", // 받고 싶은 재능
       wantedIcon: <Music size={18} /> // 받고 싶은 재능 아이콘
     },
@@ -37,27 +38,31 @@ const HomePage: React.FC = () => {
       id: 2,
       title: "UX/UI 디자인 기초 지도",
       category: "디자인",
+      subCategory: "UI/UX",
       provider: "이지현",
-      image: "https://images.unsplash.com/photo-1542744094-3a99818b5d9e?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
+      image: null, // 이미지 없음
       liked: false,
       rating: 4.5,
       ratingCount: 18,
       isFriend: false,
+      talentType: "give", // 제공하는 재능
       wantedTalent: "프로그래밍 도움", // 받고 싶은 재능
       wantedIcon: <Code size={18} /> // 받고 싶은 재능 아이콘
     },
     {
       id: 3,
-      title: "진로 상담 및 멘토링",
-      category: "상담",
+      title: "영어 회화 연습이 필요해요",
+      category: "언어",
+      subCategory: "영어",
       provider: "박서연",
       image: "https://images.unsplash.com/photo-1573497161161-c3e73707e25c?ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80",
       liked: false,
       rating: 4.9,
       ratingCount: 32,
       isFriend: true,
-      wantedTalent: "영어 회화 연습", // 받고 싶은 재능
-      wantedIcon: <Book size={18} /> // 받고 싶은 재능 아이콘
+      talentType: "receive", // 원하는 재능
+      wantedTalent: "진로 상담", // 제공할 수 있는 재능
+      wantedIcon: <Book size={18} /> // 제공할 수 있는 재능 아이콘
     }
   ]);
 
@@ -133,6 +138,9 @@ const HomePage: React.FC = () => {
   const goToTalentDetail = (id: number) => {
     navigate(`/talent/${id}`);
   };
+
+  // Default placeholder image for when no images are provided
+  const placeholderImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -283,12 +291,27 @@ const HomePage: React.FC = () => {
                   className={`bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 animate-fade-in delay-${index * 100}`}
                   onClick={() => goToTalentDetail(donation.id)}
                 >
-                  <div className="relative h-48 overflow-hidden">
-                    <img 
-                      src={donation.image} 
-                      alt={donation.title} 
-                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
-                    />
+                  <div className="relative h-48 overflow-hidden bg-gray-100">
+                    {donation.image ? (
+                      <img 
+                        src={donation.image} 
+                        alt={donation.title} 
+                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <img 
+                          src={placeholderImage}
+                          alt={donation.title}
+                          className="w-full h-full object-cover opacity-50 transition-transform duration-500 hover:scale-110"
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-lg font-medium text-gray-700 bg-white/80 px-4 py-2 rounded-md">
+                            이미지 없음
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
@@ -302,22 +325,38 @@ const HomePage: React.FC = () => {
                   </div>
                   <div className="p-6">
                     <div className="flex justify-between items-start mb-3">
-                      <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                      {/* 재능 유형 표시 */}
+                      <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                        donation.talentType === "give" 
+                          ? "bg-primary/10 text-primary" 
+                          : "bg-amber-100 text-amber-800"
+                      }`}>
+                        {donation.talentType === "give" ? "제공하는 재능" : "원하는 재능"}
+                      </div>
+                      
+                      <span className="inline-block px-3 py-1 text-xs font-medium bg-gray-100 text-gray-800 rounded-full">
                         {donation.category}
                       </span>
-                      
-                      {/* 교환 원하는 재능 표시 */}
-                      <div className="flex items-center gap-1 px-3 py-1 bg-amber-100 text-amber-800 rounded-full text-xs">
-                        {donation.wantedIcon}
-                        <span>{donation.wantedTalent}</span>
-                      </div>
                     </div>
                     
                     <h3 className="text-lg font-semibold mb-2">{donation.title}</h3>
                     <p className="text-gray-600 text-sm">by {donation.provider}</p>
                     
+                    {/* 재능 교환 표시 */}
+                    <div className="mt-3 p-2 bg-gray-50 rounded-lg border border-gray-100">
+                      <p className="text-xs font-medium text-gray-700 mb-1">
+                        {donation.talentType === "give" 
+                          ? "교환으로 원하는 재능:" 
+                          : "교환으로 제공 가능한 재능:"}
+                      </p>
+                      <div className="flex items-center">
+                        {donation.wantedIcon}
+                        <span className="ml-1 text-sm font-medium">{donation.wantedTalent}</span>
+                      </div>
+                    </div>
+                    
                     {/* 평점 표시 */}
-                    <div className="flex items-center mt-2">
+                    <div className="flex items-center mt-3">
                       <div className="flex items-center">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <button 

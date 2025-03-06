@@ -27,6 +27,7 @@ const TalentDetailPage: React.FC = () => {
     id: Number(id),
     title: "청소년 코딩 멘토링",
     category: "교육",
+    subCategory: "고등학습",
     provider: "김민준",
     providerAvatar: "https://i.pravatar.cc/150?img=1",
     description: `코딩에 관심있는 청소년들을 위한 1:1 멘토링입니다. 기초부터 차근차근 알려드립니다.
@@ -50,9 +51,9 @@ const TalentDetailPage: React.FC = () => {
     isFriend: true,
     rating: 4.8,
     ratingCount: 24,
-    location: "서울 강남구",
     scheduleOptions: ["주 1회, 1시간", "주 2회, 1시간", "협의 가능"],
-    tags: ["코딩", "프로그래밍", "웹개발", "Python", "JavaScript"],
+    talentType: "give",  // "give" 또는 "receive"
+    wantedTalent: "음악 레슨",  // 받고 싶은 재능
     reviews: [
       {
         id: 1,
@@ -157,6 +158,11 @@ const TalentDetailPage: React.FC = () => {
     );
   }
 
+  // Default placeholder image for when no images are provided
+  const placeholderImage = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80";
+  // Check if we have images
+  const hasImages = talent.images && talent.images.length > 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -174,11 +180,11 @@ const TalentDetailPage: React.FC = () => {
       </header>
 
       <div className="container mx-auto px-4 py-6">
-        {/* 이미지 갤러리 */}
+        {/* 이미지 갤러리 - 개선된 이미지 없을 때 대응 */}
         <div className="relative overflow-hidden rounded-xl shadow-sm mb-6">
           <div className="relative pb-[60%] bg-gray-100">
             <img 
-              src={talent.images[0]} 
+              src={hasImages ? talent.images[0] : placeholderImage} 
               alt={talent.title} 
               className="absolute inset-0 w-full h-full object-cover"
             />
@@ -191,30 +197,57 @@ const TalentDetailPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="flex overflow-x-auto gap-2 p-2 bg-white">
-            {talent.images.map((image, index) => (
-              <div 
-                key={index}
-                className={`w-20 h-14 flex-shrink-0 rounded-md overflow-hidden ${index === 0 ? 'ring-2 ring-primary' : ''}`}
-              >
-                <img 
-                  src={image} 
-                  alt={`${talent.title} ${index + 1}`} 
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ))}
-          </div>
+          {hasImages && talent.images.length > 1 && (
+            <div className="flex overflow-x-auto gap-2 p-2 bg-white">
+              {talent.images.map((image, index) => (
+                <div 
+                  key={index}
+                  className={`w-20 h-14 flex-shrink-0 rounded-md overflow-hidden ${index === 0 ? 'ring-2 ring-primary' : ''}`}
+                >
+                  <img 
+                    src={image} 
+                    alt={`${talent.title} ${index + 1}`} 
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* 기본 정보 */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden mb-6">
           <div className="p-6">
-            <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full mb-3">
-              {talent.category}
-            </span>
+            {/* 재능 유형 표시 */}
+            <div className="flex justify-between items-center mb-3">
+              <span className="inline-block px-3 py-1 text-xs font-medium bg-primary/10 text-primary rounded-full">
+                {talent.category} &gt; {talent.subCategory}
+              </span>
+              
+              <div className={`px-3 py-1 rounded-full text-xs font-medium ${
+                talent.talentType === "give" 
+                  ? "bg-primary/10 text-primary" 
+                  : "bg-amber-100 text-amber-800"
+              }`}>
+                {talent.talentType === "give" ? "제공하는 재능" : "원하는 재능"}
+              </div>
+            </div>
             
             <h2 className="text-2xl font-bold mb-3">{talent.title}</h2>
+            
+            {/* 교환 원하는 재능 표시 */}
+            {talent.wantedTalent && (
+              <div className="mb-4 p-3 bg-gray-50 rounded-lg border border-gray-100">
+                <p className="text-sm font-medium text-gray-700">
+                  {talent.talentType === "give" 
+                    ? "이 재능을 교환하고 싶은 재능:" 
+                    : "이 재능을 제공해 줄 수 있는 분을 찾습니다:"}
+                </p>
+                <p className="text-base font-semibold text-primary">
+                  {talent.wantedTalent}
+                </p>
+              </div>
+            )}
             
             <div className="flex items-center mb-4">
               <div className="relative">
@@ -244,10 +277,6 @@ const TalentDetailPage: React.FC = () => {
             
             <div className="space-y-3 mb-4 text-sm">
               <div className="flex items-start">
-                <MapPin size={16} className="text-gray-400 mr-2 mt-0.5" />
-                <span>{talent.location}</span>
-              </div>
-              <div className="flex items-start">
                 <Calendar size={16} className="text-gray-400 mr-2 mt-0.5" />
                 <div>
                   {talent.scheduleOptions.map((option, idx) => (
@@ -255,17 +284,6 @@ const TalentDetailPage: React.FC = () => {
                   ))}
                 </div>
               </div>
-            </div>
-            
-            <div className="flex flex-wrap gap-2 mb-4">
-              {talent.tags.map(tag => (
-                <span 
-                  key={tag}
-                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-md"
-                >
-                  #{tag}
-                </span>
-              ))}
             </div>
           </div>
         </div>

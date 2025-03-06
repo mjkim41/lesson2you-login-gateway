@@ -3,10 +3,8 @@ import React, { useState } from 'react';
 import ProfileHeader from '../components/profile/ProfileHeader';
 import ProfileSidebar from '../components/profile/ProfileSidebar';
 import WishlistTab from '../components/profile/WishlistTab';
-import PendingReservationsTab from '../components/profile/PendingReservationsTab';
-import ConfirmedReservationsTab from '../components/profile/ConfirmedReservationsTab';
-import UpcomingClassesTab from '../components/profile/UpcomingClassesTab';
-import PastClassesTab from '../components/profile/PastClassesTab';
+import ReservationManagementTab from '../components/profile/ReservationManagementTab';
+import ClassManagementTab from '../components/profile/ClassManagementTab';
 
 import {
   wishlistItems,
@@ -17,7 +15,7 @@ import {
 } from '../data/profileData';
 
 // 탭 인터페이스 정의
-type Tab = 'wishlist' | 'pending' | 'confirmed' | 'upcoming' | 'past';
+type Tab = 'wishlist' | 'reservation' | 'class';
 
 const MyProfilePage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<Tab>('wishlist');
@@ -44,17 +42,21 @@ const MyProfilePage: React.FC = () => {
               {/* 찜한 재능 목록 */}
               {activeTab === 'wishlist' && <WishlistTab wishlistItems={wishlistItems} />}
 
-              {/* 대기 중인 예약 */}
-              {activeTab === 'pending' && <PendingReservationsTab reservations={pendingReservations} />}
+              {/* 예약 관리 (대기 중/확정된 예약) */}
+              {activeTab === 'reservation' && 
+                <ReservationManagementTab 
+                  pendingReservations={pendingReservations} 
+                  confirmedReservations={confirmedReservations} 
+                />
+              }
 
-              {/* 확정된 예약 */}
-              {activeTab === 'confirmed' && <ConfirmedReservationsTab reservations={confirmedReservations} />}
-
-              {/* 예정된 수업 */}
-              {activeTab === 'upcoming' && <UpcomingClassesTab classes={upcomingClasses} />}
-
-              {/* 지난 수업 */}
-              {activeTab === 'past' && <PastClassesTab classes={pastClasses} />}
+              {/* 수업 관리 (예정된/지난 수업) */}
+              {activeTab === 'class' && 
+                <ClassManagementTab 
+                  upcomingClasses={upcomingClasses} 
+                  pastClasses={pastClasses} 
+                />
+              }
             </div>
           </div>
         </div>
